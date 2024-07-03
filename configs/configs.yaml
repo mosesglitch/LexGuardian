@@ -1,0 +1,5 @@
+data:
+    data_path: data/raw/TheConstitutionOfKenya.pdf
+
+vectorstore:
+    url: https://b439d150-8555-4215-96d3-e48eb3ad8e86.europe-west3-0.gcp.cloud.qdrant.io:6333
