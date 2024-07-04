@@ -13,7 +13,7 @@ from langchain_core.runnables import RunnablePassthrough
 
 
 def setup_environment():
-    os.chdir("c:\\Users\\Spectra\\LexGuardian")
+    # os.chdir("c:\\Users\\Spectra\\LexGuardian")
     config = load_config()
     load_dotenv()
     return config
