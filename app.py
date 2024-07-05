@@ -19,30 +19,42 @@ def capture_stream_output(func, *args, **kwargs):
     return output.getvalue()
 
 
+def retry_operation(operation, max_attempts=3, delay=1):
+    attempts = 0
+    while attempts < max_attempts:
+        try:
+            return operation()
+        except Exception as e:
+            attempts += 1
+            if attempts == max_attempts:
+                raise e
+            time.sleep(delay)
+
+
 def main():
     st.set_page_config(page_title="LexGuardian", page_icon="⚖️")
     st.title("LexGuardian - Your Pocket Lawyer")
     st.caption("Ask me anything about Kenyan law! ⚖️")
 
-    # Initialize session state
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Initialize LexGuardian components
     if "rag_chain" not in st.session_state:
         with st.spinner("Getting my briefcase 🏃🏿‍♂️..."):
-            config = setup_environment()
-            vectorstore = instantiate_db(config)
-            retriever = setup_retriever(vectorstore)
-            llm = setup_llm()
-            st.session_state.rag_chain = setup_rag_chain(retriever, llm)
 
-    # Chat input
+            def setup_components():
+                config = setup_environment()
+                vectorstore = instantiate_db(config)
+                retriever = setup_retriever(vectorstore)
+                llm = setup_llm()
+                return setup_rag_chain(retriever, llm)
+
+            st.session_state.rag_chain = retry_operation(setup_components)
+
     if prompt := st.chat_input("Your question about Kenyan law"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -51,22 +63,22 @@ def main():
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             try:
-                # Use the capture_stream_output function to get the streamed response
                 with st.spinner("Racking my brain 🧐..."):
-                    full_response = capture_stream_output(
-                        stream_response,
-                        query=prompt,
-                        rag_chain=st.session_state.rag_chain,
-                    )
 
-                # Simulate streaming effect in Streamlit
+                    def get_response():
+                        return capture_stream_output(
+                            stream_response,
+                            query=prompt,
+                            rag_chain=st.session_state.rag_chain,
+                        )
+
+                    full_response = retry_operation(get_response)
+                    full_response = full_response.rstrip("</s>")
                 displayed_response = ""
-                for (
-                    chunk
-                ) in full_response.split():  # Split by word for a smoother effect
+                for chunk in full_response.split():
                     displayed_response += chunk + " "
                     message_placeholder.markdown(displayed_response + "▌")
-                    time.sleep(0.05)  # Adjust for desired speed
+                    time.sleep(0.05)
 
                 message_placeholder.markdown(full_response)
             except Exception as e:
