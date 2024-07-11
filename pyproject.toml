@@ -18,6 +18,7 @@ python-dotenv = "^1.0.1"
 sentence-transformers = "^3.0.1"
 langchain-anthropic = "^0.1.19"
 streamlit = "^1.36.0"
+diagrams = "^0.23.4"
 
 
 [build-system]
