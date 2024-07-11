@@ -29,7 +29,7 @@ LexGuardian/
 
 ## How it works
 
-![LexGuardian Architecture Diagram](artifacts\lexguardian_architecture.png "LexGuardian System Architecture")
+![LexGuardian Architecture Diagram](artifacts/lexguardian_architecture.png "LexGuardian System Architecture")
 1. A user submits a question about Kenyan law through the Streamlit interface.
 2. The question is processed by the RAG system:
    - The retriever finds relevant information from the vector store.
