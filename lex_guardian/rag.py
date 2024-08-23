@@ -1,6 +1,8 @@
 import os
+from flask import Flask,request,jsonify
+from flask_cors import CORS
 from dotenv import load_dotenv
-from lex_guardian.utils import load_config
+from utils import load_config
 from qdrant_client import QdrantClient
 from langchain_community.vectorstores import Qdrant
 from langchain_community.document_loaders import PyPDFLoader
@@ -11,6 +13,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
+app=Flask(__name__)
+CORS(app) 
 
 def setup_environment():
     # os.chdir("c:\\Users\\Spectra\\LexGuardian")
@@ -94,8 +98,10 @@ def stream_response(rag_chain, query):
     for chunk in rag_chain.stream(query):
         print(chunk, end="", flush=True)
 
-
+@app.route("/prompt",methods=["POST"])
 def main():
+    text_value = request.form.get('textFieldName')
+    print(text_value)
     config = setup_environment()
     vectorstore = instantiate_db(config)
     retriever = setup_retriever(vectorstore)
@@ -103,8 +109,12 @@ def main():
     rag_chain = setup_rag_chain(retriever, llm)
 
     query = "What are the rights of an arrested person and what section of the constitution guarantees these rights?"
-    stream_response(rag_chain, query)
-
+    # res=stream_response(rag_chain, query)
+    res=rag_chain.stream(query)
+    print(res)
+    # print(rag_chain)
+    data={"rag_chain":"success"}
+    return jsonify(data)
 
 if __name__ == "__main__":
-    main()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)),debug=True)

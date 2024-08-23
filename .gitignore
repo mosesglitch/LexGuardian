@@ -4,9 +4,9 @@ __pycache__/
 
 # C extensions
 *.so
-
 # Distribution / packaging
 .Python
+myenv/
 env/
 build/
 develop-eggs/
